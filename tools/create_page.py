@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from typing import Any
+import json
 import requests
 
 from dify_plugin import Tool
@@ -14,6 +15,7 @@ class CreatePageTool(Tool):
         content = tool_parameters.get("content", "")
         parent_id = tool_parameters.get("parent_id", "")
         parent_type = tool_parameters.get("parent_type", "page")
+        properties_json = tool_parameters.get("properties", "")
         
         # Validate parameters
         if not title:
@@ -23,7 +25,19 @@ class CreatePageTool(Tool):
         if not content:
             yield self.create_text_message("Page content is required.")
             return
-            
+        
+        # Parse properties if provided
+        additional_properties = {}
+        if properties_json:
+            try:
+                additional_properties = json.loads(properties_json)
+                if not isinstance(additional_properties, dict):
+                    yield self.create_text_message("Properties must be a valid JSON object.")
+                    return
+            except json.JSONDecodeError:
+                yield self.create_text_message("Invalid JSON format for properties. Please provide a valid JSON object.")
+                return
+
         try:
             # Get integration token from credentials
             integration_token = self.runtime.credentials.get("integration_token")
@@ -76,6 +90,9 @@ class CreatePageTool(Tool):
                         }
                     ]
                 }
+
+            # Merge additional properties
+            properties.update(additional_properties)
                 
             # Prepare content blocks
             children = [
@@ -111,7 +128,8 @@ class CreatePageTool(Tool):
                 yield self.create_json_message({
                     "id": page_id,
                     "title": title,
-                    "url": page_url
+                    "url": page_url,
+                    "properties": properties
                 })
             except requests.HTTPError as e:
                 if e.response.status_code == 404:

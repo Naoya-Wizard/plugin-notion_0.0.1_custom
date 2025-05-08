@@ -85,6 +85,26 @@ parameters:
       zh_Hant: 父級的類型（頁面或資料庫）
     llm_description: Type of the parent - either 'page' or 'database'. Default is 'page'. This determines how the new page will be created.
     form: llm
+  # ▶︎ 追加：JSON 形式で任意プロパティを入力できるようにする
+  - name: properties
+    type: string
+    required: false
+    label:
+      en_US: Page Properties
+      zh_Hans: 页面属性
+      pt_BR: Propriedades da Página
+      ja_JP: ページプロパティ
+      zh_Hant: 頁面屬性
+    human_description:
+      en_US: JSON formatted properties for the Notion page
+      zh_Hans: 以 JSON 格式写入的页面属性
+      pt_BR: Propriedades em formato JSON para a página
+      ja_JP: JSON 形式で指定するページのプロパティ
+      zh_Hant: 以 JSON 格式撰寫的頁面屬性
+    llm_description: |
+      JSON formatted properties for the Notion page. Example: 
+      {"Status":{"select":{"name":"In Progress"}},"Priority":{"select":{"name":"High"}}}
+    form: llm
 extra:
   python:
-    source: tools/create_page.py 
+    source: tools/create_page.py
